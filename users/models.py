@@ -7,9 +7,9 @@ MANAGER = 'MANAGER'
 MEMBER = 'MEMBER'
 
 ROLE_CHOICES = [
-        (ADMIN, 'Admin'),
-        (MANAGER, 'Manager'),
         (MEMBER, 'Member'),
+        (MANAGER, 'Manager'),
+        (ADMIN, 'Admin'),
         ]
 
 class Customer(models.Model):
