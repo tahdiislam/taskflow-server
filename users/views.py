@@ -30,16 +30,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(user_id=user_id)
         return queryset
 
-class RegistrationViewSet(viewsets.ModelViewSet):
+class RegistrationViewSet(APIView):
     serializer_class = RegistrationSerializer
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
-        if serializer.is_vlaid():
+        if serializer.is_valid():
             user = serializer.save()
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             full_name = f'{user.first_name} {user.last_name}'
-            confirm_url = f'http://127.0.0.1:8000/user/confirm/{uid}/{token}/'
+            confirm_url = f'{env("BACKEND_URL")}/user/confirm/{uid}/{token}/'
             email_subject = 'Confirm Your Account'
             email_body = render_to_string('users/confirm_account_mail.html', {'confirm_url': confirm_url, 'full_name': full_name})
             email = EmailMultiAlternatives(email_subject, '', to=[user.email])
@@ -49,19 +49,20 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=400)
 
-def activate(request, uidb64, token):
+def activate(request, uid64, token):
     try:
-        uid = urlsafe_base64_decode(uidb64).decode()
+        uid = urlsafe_base64_decode(uid64).decode()
         user = User._default_manager.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        Customer(user=user).save()
+        if not Customer.objects.filter(user=user).exists():
+            Customer(user=user).save()
         return redirect(env("ClIENT_URL")+"/login")
     else:
-        return Response(env("ClIENT_URL")+"/register")
+        return redirect(env("ClIENT_URL")+"/register")
 
 class LoginView(APIView):
     def post(self, request):
@@ -69,6 +70,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
+            print(username, password)
             user = authenticate(username=username, password=password)
             if user is not None and user.is_active:
                 token, _ = Token.objects.get_or_create(user=user)
