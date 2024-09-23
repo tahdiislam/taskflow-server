@@ -35,6 +35,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'error': 'User with this email or username already exist'})
         user = User(username=username, first_name=first_name, last_name=last_name, email=email)
         user.set_password(password)
+        user.is_active = False
         user.save()
         Customer.objects.create(user=user)
         return user
