@@ -8,3 +8,6 @@ class Customer(models.Model):
     job_title = models.CharField(max_length=100, blank=True, null=True)
     bio = models.TextField(max_length=500, blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username
