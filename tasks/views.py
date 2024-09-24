@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, TaskUpdateSerializer
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 # Create your views here.
 class TaskViewSet(viewsets.ModelViewSet):
@@ -9,6 +12,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
+        
         queryset = super().get_queryset()
         project_id = self.request.query_params.get('project_id')
         if project_id is not None:
@@ -29,3 +33,15 @@ class TaskViewSet(viewsets.ModelViewSet):
         if title is not None:
             queryset = queryset.filter(title=title)
         return queryset
+
+class TaskUpdateViewSet(APIView):
+    def patch(self, request, pk):
+        try:
+            task = Task.objects.get(id=pk)
+        except Task.DoesNotExist:
+            return Response({"error": "Task not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = TaskUpdateSerializer(instance=task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

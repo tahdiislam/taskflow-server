@@ -8,5 +8,6 @@ router = DefaultRouter()
 router.register('list', views.TaskViewSet)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('update-status/<int:pk>/', views.TaskUpdateViewSet.as_view()),
 ]

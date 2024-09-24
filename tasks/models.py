@@ -31,7 +31,7 @@ class Task(models.Model):
 class Comment(models.Model):
     task = models.ForeignKey(Task, related_name='comments', on_delete=models.CASCADE)
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField(max_length=300)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -51,3 +51,6 @@ class Notification(models.Model):
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.message
