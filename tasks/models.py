@@ -17,13 +17,14 @@ PRIORITY_CHOICES = [
     ]
 
 class Task(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    title = models.CharField(max_length=80)
+    description = models.TextField(max_length=200,blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Low')
     due_date = models.DateField()
     assigned_to = models.ForeignKey(User, related_name='tasks', on_delete=models.CASCADE)
     project = models.ForeignKey(Project, related_name='tasks', on_delete=models.CASCADE)
+    createdAt = models.DateField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.title
