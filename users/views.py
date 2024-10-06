@@ -70,7 +70,6 @@ class LoginView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
-            print(username, password)
             user = authenticate(username=username, password=password)
             if user is not None and user.is_active:
                 token, _ = Token.objects.get_or_create(user=user)
@@ -79,8 +78,10 @@ class LoginView(APIView):
                     return Response({'token': token.key, 'user_id': user.pk, 'admin': True}, status=200)
                 else:
                     return Response({'token': token.key, 'user_id': user.pk}, status=200)
+            else:
+                return Response({'message': 'Username or password is incorrect'}, status=400)
         else:
-            return Response({'message': 'Username or password is incorrect'}, status=400)
+            return Response({'message': 'Some thing is wrong'}, status=400)
 
 class LogoutView(APIView):
     def get(self, request):
